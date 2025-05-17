@@ -1,0 +1,232 @@
+{% extends "base.html" %}
+
+{% block title %}Questions - Medical Diagnosis System{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h2>Additional Questions</h2>
+            </div>
+            <div class="card-body">
+                <div class="questions-intro mb-4">
+                    <p class="lead">To refine our diagnosis, please answer a few additional questions about your symptoms.</p>
+                    <p>These questions will help us better understand your condition and provide more accurate results.</p>
+                </div>
+                
+                <form id="additional-questions-form">
+                    <!-- Severity Question Section -->
+                    <div class="question-section mb-5">
+                        <h3 class="mb-3">Symptom Severity</h3>
+                        
+                        {% if session.selected_symptoms %}
+                        <div class="severity-questions">
+                            {% for symptom in session.selected_symptoms %}
+                            <div class="card mb-3 symptom-severity-card">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ get_translation(session.language, symptom) }}</h5>
+                                    <p class="text-muted">How severe is this symptom?</p>
+                                    
+                                    <div class="severity-range">
+                                        <input type="range" class="form-range" 
+                                            id="severity-{{ symptom }}" 
+                                            name="severity-{{ symptom }}"
+                                            min="1" max="10" value="5">
+                                        <div class="d-flex justify-content-between">
+                                            <span class="severity-label">Mild</span>
+                                            <span class="severity-label">Moderate</span>
+                                            <span class="severity-label">Severe</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mt-3">
+                                        <label for="duration-{{ symptom }}" class="form-label">How long have you experienced this symptom?</label>
+                                        <select class="form-select" id="duration-{{ symptom }}" name="duration-{{ symptom }}">
+                                            <option value="hours">A few hours</option>
+                                            <option value="days">Days</option>
+                                            <option value="week" selected>About a week</option>
+                                            <option value="weeks">Several weeks</option>
+                                            <option value="months">Months</option>
+                                            <option value="years">Years</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i> No symptoms have been selected yet. Please go to the <a href="{{ url_for('diagnosis_page') }}" class="alert-link">Diagnosis page</a> to select symptoms first.
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- General Questions -->
+                    <div class="question-section mb-5">
+                        <h3 class="mb-3">General Health Information</h3>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="age-range" class="form-label">Age Range</label>
+                                <select class="form-select" id="age-range" name="age-range">
+                                    <option value="child">Under 12 years</option>
+                                    <option value="teen">12-17 years</option>
+                                    <option value="young-adult">18-30 years</option>
+                                    <option value="adult" selected>31-50 years</option>
+                                    <option value="older-adult">51-65 years</option>
+                                    <option value="senior">Over 65 years</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="gender" class="form-label">Gender</label>
+                                <select class="form-select" id="gender" name="gender">
+                                    <option value="male">Male</option>
+                                    <option value="female">Female</option>
+                                    <option value="other">Other</option>
+                                    <option value="prefer-not">Prefer not to say</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Do you have any pre-existing medical conditions? (Select all that apply)</label>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="condition-diabetes" name="conditions[]" value="diabetes">
+                                        <label class="form-check-label" for="condition-diabetes">Diabetes</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="condition-hypertension" name="conditions[]" value="hypertension">
+                                        <label class="form-check-label" for="condition-hypertension">Hypertension</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="condition-asthma" name="conditions[]" value="asthma">
+                                        <label class="form-check-label" for="condition-asthma">Asthma</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="condition-heart" name="conditions[]" value="heart">
+                                        <label class="form-check-label" for="condition-heart">Heart Disease</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="condition-thyroid" name="conditions[]" value="thyroid">
+                                        <label class="form-check-label" for="condition-thyroid">Thyroid Disease</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="condition-none" name="conditions[]" value="none">
+                                        <label class="form-check-label" for="condition-none">None</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="medications" class="form-label">Are you currently taking any medications?</label>
+                            <textarea class="form-control" id="medications" name="medications" rows="2" placeholder="List your current medications (optional)"></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="question-section mb-5">
+                        <h3 class="mb-3">Additional Details</h3>
+                        <div class="mb-3">
+                            <label for="notes" class="form-label">Any additional information you'd like to provide?</label>
+                            <textarea class="form-control" id="notes" name="notes" rows="3" placeholder="Additional details about your symptoms or health history..."></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center mt-4">
+                        <a href="{{ url_for('findings_page') }}" class="btn btn-secondary btn-lg me-3">Skip Questions</a>
+                        <button type="submit" id="submit-questions" class="btn btn-primary btn-lg">Submit Answers</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .symptom-severity-card {
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+    
+    .symptom-severity-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    
+    .severity-range {
+        padding: 10px 0;
+    }
+    
+    .severity-label {
+        font-size: 0.8rem;
+        color: #6c757d;
+    }
+    
+    .question-section {
+        border-bottom: 1px solid #dee2e6;
+        padding-bottom: 20px;
+    }
+    
+    .question-section:last-child {
+        border-bottom: none;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Toggle the "None" condition checkbox
+    $('#condition-none').on('change', function() {
+        if($(this).is(':checked')) {
+            // Uncheck and disable all other condition checkboxes
+            $('input[name="conditions[]"]').not('#condition-none').prop({
+                'checked': false,
+                'disabled': true
+            });
+        } else {
+            // Enable all condition checkboxes
+            $('input[name="conditions[]"]').prop('disabled', false);
+        }
+    });
+    
+    // If another condition is checked, uncheck "None"
+    $('input[name="conditions[]"]').not('#condition-none').on('change', function() {
+        if($(this).is(':checked')) {
+            $('#condition-none').prop('checked', false);
+        }
+    });
+    
+    // Form submission
+    $('#additional-questions-form').on('submit', function(e) {
+        e.preventDefault();
+        
+        // Collect form data
+        const formData = {};
+        
+        // Process all form fields
+        $(this).serializeArray().forEach(function(item) {
+            if(formData[item.name]) {
+                if(Array.isArray(formData[item.name])) {
+                    formData[item.name].push(item.value);
+                } else {
+                    formData[item.name] = [formData[item.name], item.value];
+                }
+            } else {
+                formData[item.name] = item.value;
+            }
+        });
+        
+        // Show a success message and redirect
+        alert('Thank you for providing additional information!');
+        window.location.href = '{{ url_for("findings_page") }}';
+    });
+});
+</script>
+{% endblock %}

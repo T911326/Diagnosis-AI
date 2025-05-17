@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}Findings - Medical Diagnosis System{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h2>Intermediate Findings</h2>
+            </div>
+            <div class="card-body">
+                {% if 'diagnosis_results' not in session or not session.diagnosis_results %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i> No diagnosis has been performed yet. Please go to the <a href="{{ url_for('diagnosis_page') }}" class="alert-link">Diagnosis page</a> to analyze symptoms first.
+                </div>
+                {% else %}
+                <div class="findings-container">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h3>Selected Symptoms</h3>
+                            <div class="symptoms-list mb-4">
+                                {% if session.selected_symptoms %}
+                                <ul class="list-group">
+                                    {% for symptom in translated_symptoms %}
+                                    <li class="list-group-item">
+                                        <i class="fas fa-check-circle text-success me-2"></i>
+                                        {{ symptom }}
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                                {% else %}
+                                <p class="text-muted">No symptoms selected.</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h3>Analysis Details</h3>
+                            <div class="analysis-details mb-4">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <p><strong>Symptom Count:</strong> {{ session.selected_symptoms|length }}</p>
+                                        <p><strong>Potential Matches:</strong> {{ session.diagnosis_results|length }}</p>
+                                        <p><strong>Diagnosis Date:</strong> {{ session.diagnosis_date if 'diagnosis_date' in session else 'Unknown' }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h3 class="mt-4">Symptom Correlation Analysis</h3>
+                    <p class="text-muted">This shows how your symptoms might be interconnected, based on our medical database.</p>
+                    
+                    <div class="correlation-chart my-4">
+                        <!-- Placeholder for the correlation chart - in a real app, this would be a visualization -->
+                        <div class="correlation-placeholder p-4 text-center bg-light rounded">
+                            <i class="fas fa-project-diagram fa-4x text-secondary mb-3"></i>
+                            <h5>Symptom Correlation Visualization</h5>
+                            <p class="text-muted">The visualization would show connections between your symptoms.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-4">
+                        <div class="col-12 text-center">
+                            <a href="{{ url_for('conclusions_page') }}" class="btn btn-primary btn-lg">
+                                <i class="fas fa-arrow-right me-2"></i>View Conclusions
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .symptoms-list .list-group-item {
+        transition: background-color 0.3s;
+    }
+    
+    .symptoms-list .list-group-item:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .correlation-placeholder {
+        border: 2px dashed #dee2e6;
+        height: 300px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+
+{% block title %}Conclusions - Medical Diagnosis System{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h2>Diagnosis Conclusions</h2>
+            </div>            <div class="card-body">
+                {% if not has_diagnosis %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i> No diagnosis has been performed yet. Please go to the <a href="{{ url_for('diagnosis_page') }}" class="alert-link">Diagnosis page</a> to analyze symptoms first.
+                </div>
+                {% else %}
+                <div class="diagnosis-conclusion">
+                    <div class="diagnosis-chart mb-4 text-center">
+                        <h3 class="mb-3">Confidence Chart</h3>
+                        <div id="chart-container" class="chart-wrapper">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                      <h3 class="my-4">Potential Conditions</h3>
+                    <div class="results-container" id="diagnosis-results-container">
+    <!-- Results will be loaded via AJAX -->
+</div>
+
+                    <div class="actions-container mt-4">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <button id="export-pdf-btn" class="btn btn-info btn-lg w-100">
+                                    <i class="fas fa-file-pdf me-2"></i>Export as PDF
+                                </button>
+                            </div>
+                            <div class="col-md-4">
+                                <button id="save-json-btn" class="btn btn-secondary btn-lg w-100">
+                                    <i class="fas fa-save me-2"></i>Save Results
+                                </button>
+                            </div>
+                            <div class="col-md-4">
+                                <button id="share-btn" class="btn btn-primary btn-lg w-100">
+                                    <i class="fas fa-share-alt me-2"></i>Share Results
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-5">
+                        <h3>Important Note</h3>
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i> The information provided by this system is not a substitute for professional medical advice. Always consult with a qualified healthcare provider regarding any medical conditions or symptoms.
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block modals %}
+<!-- Share Modal -->
+<div class="modal fade" id="share-modal" tabindex="-1" aria-labelledby="shareModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="shareModalLabel">Share Your Results</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group mb-3">
+                    <label for="share-email" class="form-label">Email Address</label>
+                    <input type="email" class="form-control" id="share-email" placeholder="recipient@example.com">
+                </div>
+                <div class="form-group mb-3">
+                    <label for="share-message" class="form-label">Message (Optional)</label>
+                    <textarea class="form-control" id="share-message" rows="3" placeholder="Include a message with your results..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="send-share-btn">Send</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Generate chart when the page loads if there are diagnosis results
+    generateConclusionChart();
+    
+    // Export PDF button
+    $('#export-pdf-btn').on('click', function() {
+        window.location.href = '{{ url_for("export_pdf") }}';
+    });
+    
+    // Save results button
+    $('#save-json-btn').on('click', function() {
+        window.location.href = '{{ url_for("save_results") }}';
+    });
+    
+    // Share results button
+    $('#share-btn').on('click', function() {
+        $('#share-modal').modal('show');
+    });
+    
+    // Send share button (would be implemented with backend support)
+    $('#send-share-btn').on('click', function() {
+        alert('Sharing functionality would be implemented here.');
+        $('#share-modal').modal('hide');
+    });
+      function generateConclusionChart() {
+        $.ajax({
+            url: '/generate-chart-from-session',
+            type: 'GET',
+            success: function(response) {
+                if (response.success) {
+                    // Create image from base64 data
+                    const chartImg = $('<img>').attr({
+                        'src': response.chart_data,
+                        'class': 'img-fluid',
+                        'alt': 'Diagnosis Chart'
+                    });
+                    
+                    $('#chart-container').empty().append(chartImg);
+                } else {
+                    $('#chart-container').html('<p class="text-danger">Failed to generate chart</p>');
+                }
+            },
+            error: function() {
+                $('#chart-container').html('<p class="text-danger">Failed to connect to the server</p>');
+            }
+        });
+    }
+});
+</script>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --success: #28a745;
+        --warning: #ffc107;
+        --danger: #dc3545;
+        --primary: #007bff;
+        --dark-text: #343a40;
+    }
+
+    .chart-wrapper {
+        min-height: 300px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .result-card {
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+        background: white;
+        overflow: hidden;
+        transition: transform 0.3s ease;
+    }
+    
+    .result-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .result-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 20px;
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .disease-name {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--primary);
+        margin: 0;
+    }
+    
+    .confidence {
+        font-weight: bold;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+    }
+    
+    .confidence.high {
+        background-color: var(--success);
+    }
+    
+    .confidence.medium {
+        background-color: var(--warning);
+        color: var(--dark-text);
+    }
+    
+    .confidence.low {
+        background-color: var(--danger);
+    }
+
+    .confidence-bar.high {
+        background-color: var(--success);
+    }
+
+    .confidence-bar.medium {
+        background-color: var(--warning);
+    }
+
+    .confidence-bar.low {
+        background-color: var(--danger);
+    }
+</style>
+{% endblock %}

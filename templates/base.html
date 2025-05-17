@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Medical Diagnosis System{% endblock %}</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Header -->
+    <header class="header bg-primary text-white py-3 mb-4">
+        <div class="container d-flex justify-content-between align-items-center">
+            <h1 id="app-title" class="mb-0">{{ translations.title }}</h1>                <nav class="main-nav">
+                    <ul class="nav">
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="{{ url_for('index') }}">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="{{ url_for('diagnosis_page') }}">Diagnosis</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="{{ url_for('findings_page') }}">Findings</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="{{ url_for('conclusions_page') }}">Conclusions</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="{{ url_for('about_page') }}">About</a>
+                        </li>
+                    </ul>
+                </nav>
+            <div class="language-selector">
+                <label for="language-select">{{ translations.language_select }}</label>
+                <select id="language-select" class="form-select">
+                    {% for lang in languages %}
+                        <option value="{{ lang.code }}" {% if lang.code == current_lang %}selected{% endif %}>
+                            {{ lang.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container mb-5">
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer bg-dark text-white py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h4>Medical Diagnosis System</h4>
+                    <p>A comprehensive medical diagnostic tool designed to help identify potential conditions based on symptoms.</p>
+                </div>                <div class="col-md-3">
+                    <h5>Quick Links</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="{{ url_for('index') }}" class="text-white">Home</a></li>
+                        <li><a href="{{ url_for('diagnosis_page') }}" class="text-white">Diagnosis</a></li>
+                        <li><a href="{{ url_for('findings_page') }}" class="text-white">Findings</a></li>
+                        <li><a href="{{ url_for('conclusions_page') }}" class="text-white">Conclusions</a></li>
+                        <li><a href="{{ url_for('about_page') }}" class="text-white">About</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3">
+                    <h5>Contact</h5>
+                    <p><i class="fas fa-envelope me-2"></i> support@diagnosisai.com</p>
+                    <p><i class="fas fa-phone me-2"></i> +1 (555) 123-4567</p>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-12 text-center">
+                    <p class="mb-0">&copy; {{ current_year }} Medical Diagnosis System. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Common Modals -->
+    {% block modals %}{% endblock %}
+
+    <!-- JavaScript Libraries -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Common JavaScript -->
+    <script>
+        // Pass translations to JavaScript
+        const translations = {{ translations|tojson }};
+        const currentLanguage = "{{ current_lang }}";
+    </script>
+    
+    <!-- Custom JavaScript -->
+    <script src="{{ url_for('static', filename='js/common.js') }}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+
+{% block title %}Diagnosis - Medical Diagnosis System{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Symptoms Panel (Left) -->
+    <div class="col-lg-8 mb-4">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h2>{{ translations.search_symptoms }}</h2>
+                <div class="input-group mt-2">
+                    <input type="text" id="symptom-search" class="form-control" placeholder="Search...">
+                    <button class="btn btn-light" type="button" id="search-btn">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <!-- Symptoms Tabs -->
+                <ul class="nav nav-tabs" id="symptomTabs" role="tablist">
+                    {% for category, category_symptoms in symptoms.items() %}
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link {% if loop.first %}active{% endif %}" 
+                            id="tab-{{ loop.index }}" 
+                            data-bs-toggle="tab" 
+                            data-bs-target="#panel-{{ loop.index }}" 
+                            type="button" 
+                            role="tab">
+                            {{ category }}
+                        </button>
+                    </li>
+                    {% endfor %}
+                </ul>
+                
+                <!-- Symptoms Content -->
+                <div class="tab-content p-3" id="symptomTabContent">
+                    {% for category, category_symptoms in symptoms.items() %}
+                    <div class="tab-pane fade {% if loop.first %}show active{% endif %}" 
+                         id="panel-{{ loop.index }}" 
+                         role="tabpanel">
+                        
+                        <div class="symptom-grid">
+                            {% for symptom in category_symptoms %}
+                            <div class="form-check symptom-item" data-search="{{ symptom.name.lower() }}">
+                                <input class="form-check-input symptom-checkbox" 
+                                       type="checkbox" 
+                                       id="symptom-{{ symptom.id }}" 
+                                       data-symptom-id="{{ symptom.id }}" 
+                                       name="symptoms">
+                                <label class="form-check-label" for="symptom-{{ symptom.id }}">
+                                    {{ symptom.name }}
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Actions Panel (Right) -->
+    <div class="col-lg-4">
+        <div class="card mb-4">
+            <div class="card-header bg-secondary text-white">
+                <h2>Actions</h2>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-3">
+                    <button id="diagnose-btn" class="btn btn-success btn-lg action-btn">
+                        <i class="fas fa-stethoscope me-2"></i>{{ translations.diagnose }}
+                    </button>
+                    <button id="chart-btn" class="btn btn-primary btn-lg action-btn" disabled>
+                        <i class="fas fa-chart-bar me-2"></i>{{ translations.chart }}
+                    </button>
+                    <button id="export-btn" class="btn btn-info btn-lg action-btn" disabled>
+                        <i class="fas fa-file-pdf me-2"></i>{{ translations.export }}
+                    </button>
+                    <button id="save-btn" class="btn btn-secondary btn-lg action-btn" disabled>
+                        <i class="fas fa-save me-2"></i>{{ translations.save }}
+                    </button>
+                    <button id="clear-btn" class="btn btn-danger btn-lg action-btn">
+                        <i class="fas fa-trash me-2"></i>{{ translations.clear }}
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Help Section -->
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h2>Help</h2>
+            </div>
+            <div class="card-body">
+                <p>Select symptoms from the list and click Diagnose to get potential conditions based on your selections.</p>
+                <p>After diagnosis, you can view results in a chart, export to PDF, or save results for later.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block modals %}
+<!-- Diagnosis Results Modal -->
+<div class="modal fade" id="diagnosis-modal" tabindex="-1" aria-labelledby="diagnosisModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="diagnosisModalLabel">{{ translations.diagnosis_result }}</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h4>{{ translations.diagnosis_result_header }}</h4>
+                <div id="diagnosis-results"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="modal-chart-btn" class="btn btn-primary">
+                    <i class="fas fa-chart-bar me-2"></i>{{ translations.chart }}
+                </button>
+                <button type="button" id="modal-export-btn" class="btn btn-info">
+                    <i class="fas fa-file-pdf me-2"></i>{{ translations.export }}
+                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>{{ translations.close }}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart Modal -->
+<div class="modal fade" id="chart-modal" tabindex="-1" aria-labelledby="chartModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="chartModalLabel">{{ translations.diagnosis_chart_title }}</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center" id="chart-container">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>{{ translations.close }}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+{% endblock %}
