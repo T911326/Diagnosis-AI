@@ -49,6 +49,16 @@ function showAlert(type, message) {
     
     // Append to body
     $('body').append(alertElement);
+}
+
+// Get translation for a specific key
+function getTranslation(key, defaultText = null) {
+    // Check if translations object exists (it should be defined in the base template)
+    if (typeof translations !== 'undefined' && translations[key]) {
+        return translations[key];
+    }
+    // Return the key itself or the provided default text if translation not found
+    return defaultText || key;
     
     // Position the alert at the top of the page
     alertElement.css({
